@@ -1,50 +1,64 @@
 #!/bin/bash
 
-# Set your desired branch name (replace with your actual branch)
-BRANCH_NAME="main"
+# הדפסת הודעה על התחלת התהליך
+echo "Starting the deployment process..."
 
-# Function to handle errors and print error messages
-function handle_error() {
-  echo "Error: $1" >&2  # >&2 redirects error message to stderr
-  exit 1               # Exit the script with an error code
-}
+# שלב 1: בדיקת סטטוס Git
+echo "Checking Git status..."  
+git status   
+if [ $? -ne 0 ]; then
+    echo "Error: git status failed!"  
+    exit 1
+fi
 
-# 1. Stage, Commit, and Push to GitHub
+# שלב 2: הוספת כל השינויים (סטייג'ינג)
+echo "Staging all changes..."    
+git add .    
+if [ $? -ne 0 ]; then
+    echo "Error: git add failed!"   
+    exit 1
+fi
 
-# Check for unstaged changes
-git diff --quiet --cached || handle_error "There are unstaged changes. Please stage them before running the script."
+# שלב 3: יצירת Commit עם הודעת אוטומטית
+commit_message="Change made"
+echo "Committing changes with message: $commit_message"    
+git commit -m "$commit_message"    
+if [ $? -ne 0 ]; then
+    echo "Error: nothing in commit!"   
+    exit 1
+fi
 
-# Stage all changes
-git add .
+# שלב 4: Push ל-GitHub
+echo "Pushing changes to GitHub..."    
+git push origin main    
+if [ $? -ne 0 ]; then
+    echo "Error: git push failed!"   
+    exit 1
+fi
 
-# Commit changes with a message
-git commit -m "Change made: $(date)" || handle_error "Failed to commit changes."
+# שלב 5: התקנת תלותים
+echo "Installing dependencies..."    
+npm install    
+if [ $? -ne 0 ]; then
+    echo "Error: npm install failed!"   
+    exit 1
+fi
 
-# Push changes to GitHub
-git push origin $BRANCH_NAME || handle_error "Failed to push changes to GitHub."
+# שלב 6: בניית האפליקציה
+echo "Building the app..."    
+npm run build   
+if [ $? -ne 0 ]; then
+    echo "Error: npm run build failed!"  
+    exit 1
+fi
 
-echo "Successfully pushed changes to GitHub branch: $BRANCH_NAME"
+# שלב 7: העלאת קבצים ל-GCS
+echo "Uploading build to Google Cloud Storage (GCS)..."   
+gcloud storage  cp -r ./build/* gs:// rachel-fried-bucket-2   
+if [ $? -ne 0 ]; then
+    echo "Error: gcloud storage upload failed!"  
+    exit 1
+fi
 
-# 2. Install dependencies and build the app
-
-
-
-npm install || handle_error "Failed to install dependencies."
-npm run build || handle_error "Failed to build the application."
-
-echo "Successfully built the application."
-
-# 3. Upload the built files to the GCS bucket
-
-# Set your GCS bucket name 
-BUCKET_NAME="rachel-fried-bucket-2"
-
-# Specify the build directory 
-BUILD_DIR="build"
-
-# Upload all files from the build directory to the GCS bucket
-gsutil -m cp -r $BUILD_DIR/* gs://$BUCKET_NAME/ || handle_error "Failed to upload files to GCS bucket."
-
-echo "Successfully uploaded files to GCS bucket: $BUCKET_NAME"
-
-echo "Deployment completed!"
+# הודעה על סיום ההפעלה
+echo "Deployment process completed successfully!"
