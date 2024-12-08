@@ -52,7 +52,7 @@ fi
 
 # שלב 7: העלאת קבצים ל-GCS
 echo "Uploading build to Google Cloud Storage (GCS)..."   
-gcloud storage  cp -r ./build/* gs://rachel-fried-bucket-2  
+gcloud storage  cp -r ./build/* gs://rachel-fried-bucket-2 
 if [ $? -ne 0 ]; then
     echo "Error: gcloud storage upload failed!"  
     exit 1
