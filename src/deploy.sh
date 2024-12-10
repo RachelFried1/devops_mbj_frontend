@@ -51,7 +51,7 @@ if [ $? -ne 0 ]; then
 fi
 
 
-echo "Uploading build to Google Cloud Storage (GCS)..."   
+echo "Uploading txt to Google Cloud Storage (GCS)..."   
 gcloud storage cp t.txt google://rachel-fried-bucket-2/t.txt
 if [ $? -ne 0 ]; then
     echo "Error: gcloud storage upload failed!"  
