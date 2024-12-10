@@ -50,6 +50,13 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+
+echo "Uploading build to Google Cloud Storage (GCS)..."   
+gcloud storage cp t.txt google://rachel-fried-bucket-2/t.txt
+if [ $? -ne 0 ]; then
+    echo "Error: gcloud storage upload failed!"  
+    exit 1
+fi
 # שלב 7: העלאת קבצים ל-GCS
 echo "Uploading build to Google Cloud Storage (GCS)..."   
 gcloud storage cp build/ google://rachel-fried-bucket-2/build/
